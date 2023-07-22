@@ -1,0 +1,12 @@
+dist/*.test.js
+tsconfig.json
+jest.config.js
+.eslintignore
+.eslintrc.cjs
+.idea/
+
+# misc
+.DS_Store
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
