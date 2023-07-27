@@ -195,7 +195,10 @@ export const findAllAgariPatterns = (haipai: Int8Array) => {
   let res: number[][][] = [];
   haipai = haipai.slice(); // clone
 
-  if (!checkAll(haipai)) {
+  const canBeKokushi = check13(haipai);
+  const canBeChiitoitsu = check7(haipai);
+  const canBeBasicForm = check(haipai);
+  if (!canBeKokushi && !canBeChiitoitsu && !canBeBasicForm) {
     return res;
   }
 
@@ -206,6 +209,21 @@ export const findAllAgariPatterns = (haipai: Int8Array) => {
       res.push([[found, found]]);
     }
     return res;
+  }
+
+  // Check kokushi separately
+  if (canBeKokushi) {
+    res.push([
+      haipai.reduce((acc, v, idx) => {
+        if (v > 0) {
+          acc.push(idx);
+          if (v > 1) {
+            acc.push(idx);
+          }
+        }
+        return acc;
+      }, [] as number[]),
+    ]);
   }
 
   // Some questionable code below :)
@@ -240,7 +258,7 @@ export const findAllAgariPatterns = (haipai: Int8Array) => {
 
   haipai[fakePairIndex] -= 2;
 
-  if (check7(haipai)) {
+  if (canBeChiitoitsu) {
     res.push(
       haipai.reduce((acc, v, idx) => {
         if (v === 2) {

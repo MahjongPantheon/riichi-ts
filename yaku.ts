@@ -29,7 +29,7 @@ const toHand = (pattern: number[][]) => {
       0, 0, 0, 0, 0, 0, 0]
   );
   for (let tile of occurences) {
-    hand[tile]++;
+    hand[Math.abs(tile)]++;
   }
   return hand;
 };
@@ -58,7 +58,7 @@ const checkChanta = (o: Riichi, allow: number[]) => {
   let hasJyuntsu = false;
   for (let v of o.currentPattern ?? []) {
     if (v.length <= 2 || v[0] === v[1]) {
-      if (!allow.includes(v[0])) {
+      if (!allow.includes(Math.abs(v[0]))) {
         return false;
       }
     } else {
@@ -134,7 +134,7 @@ export const YAKU = {
       ) {
         return false;
       }
-      return o.takenTile !== null && [2, 4].includes(slices[foundSuit][o.takenTile]);
+      return o.takenTile !== null && [2, 4].includes(slices[foundSuit][o.takenTile % 9]);
     },
   },
   chuurenpoto: {
@@ -154,7 +154,7 @@ export const YAKU = {
       ) {
         return false;
       }
-      return o.takenTile !== null && [1, 3].includes(slices[foundSuit][o.takenTile]);
+      return o.takenTile !== null && [1, 3].includes(slices[foundSuit][o.takenTile % 9]);
     },
   },
   'suuankou tanki': {
@@ -165,7 +165,7 @@ export const YAKU = {
     isFuroMinus: false,
     check: (o: Riichi) => {
       if (o.furo.length > 0) {
-        if (o.furo.some((v) => v[0] > 0)) {
+        if (o.furo.some((v) => 1 / v[0] > 0)) {
           // open sets are not allowed
           return false;
         }
@@ -191,7 +191,7 @@ export const YAKU = {
     isFuroMinus: false,
     check: (o: Riichi) => {
       if (o.furo.length > 0) {
-        if (o.furo.some((v) => v[0] > 0)) {
+        if (o.furo.some((v) => 1 / v[0] > 0)) {
           // open sets are not allowed
           return false;
         }
@@ -203,10 +203,10 @@ export const YAKU = {
         }
       }
 
-      return kotsu === 4 && o.isTsumo;
+      return kotsu === 4 && o.isTsumo && !YAKU['suuankou tanki'].check(o);
     },
   },
-  daisuushii: {
+  daisuushi: {
     isLocal: false,
     yakuman: 2,
     han: 0,
@@ -223,7 +223,7 @@ export const YAKU = {
       return res === 4;
     },
   },
-  shosuushii: {
+  shosuushi: {
     isLocal: false,
     yakuman: 1,
     han: 0,
@@ -261,7 +261,7 @@ export const YAKU = {
       return kotsu === 3;
     },
   },
-  tsuuisou: {
+  tsuuiisou: {
     isLocal: false,
     yakuman: 1,
     han: 0,
@@ -269,7 +269,7 @@ export const YAKU = {
     isFuroMinus: false,
     check: (o: Riichi) => checkAllowed(o, [27, 28, 29, 30, 31, 32, 33]),
   },
-  ryuuisou: {
+  ryuuiisou: {
     isLocal: false,
     yakuman: 1,
     han: 0,
@@ -308,7 +308,7 @@ export const YAKU = {
     isMenzenOnly: true,
     isFuroMinus: false,
     check: (o: Riichi) => {
-      return o.extra.firstTake && o.isTsumo && o.jikaze === 1 && !o.furo.length;
+      return o.extra.firstTake && o.isTsumo && o.jikaze === 27 && !o.furo.length;
     },
   },
   chihou: {
@@ -318,7 +318,7 @@ export const YAKU = {
     isMenzenOnly: true,
     isFuroMinus: false,
     check: (o: Riichi) => {
-      return o.extra.firstTake && o.isTsumo && o.jikaze !== 1 && !o.furo.length;
+      return o.extra.firstTake && o.isTsumo && o.jikaze !== 27 && !o.furo.length;
     },
   },
   renhou: {
@@ -328,7 +328,7 @@ export const YAKU = {
     isMenzenOnly: true,
     isFuroMinus: false,
     check: (o: Riichi) => {
-      return o.extra.firstTake && !o.isTsumo && o.jikaze !== 1 && !o.furo.length;
+      return o.extra.firstTake && !o.isTsumo && !o.furo.length;
     },
   },
   daisharin: {
@@ -456,7 +456,7 @@ export const YAKU = {
           kotsuOrToitsu++;
         }
       }
-      return kotsuOrToitsu === 3 && !YAKU.daisangen.check(o);
+      return kotsuOrToitsu === 3 && !YAKU.daisangen.check(o) && !YAKU.chiitoitsu.check(o);
     },
   },
   'sanshoku doukou': {
@@ -496,13 +496,29 @@ export const YAKU = {
       // keep here all tiles that are not closed kantsu
       let openKotsu = new Set();
       for (let k of o.furo) {
-        if (k[0] > 0) {
+        if (1 / k[0] > 0 && k[0] === k[1]) {
+          // workaround: use 1/k[0] because we can have -0 as a valid value for closed 1m kan
           openKotsu.add(k[0]);
         }
       }
 
+      const closedPart = o.currentPattern?.filter(
+        (set) => o.furo.find((meld) => digest([set]) === digest([meld])) === undefined
+      );
       for (let v of o.currentPattern ?? []) {
-        if (openKotsu.has(v[0])) {
+        if (
+          openKotsu.has(v[0]) ||
+          (v.length >= 3 &&
+            !o.isTsumo &&
+            o.takenTile !== undefined &&
+            o.takenTile !== null &&
+            v[0] === v[1] &&
+            v.includes(o.takenTile) &&
+            closedPart?.find(
+              // Taken tile should not be included in any other chi set, otherwise we still count is as kotsu
+              (set) => o.takenTile === v[0] && set[0] !== set[1] && set.includes(o.takenTile)
+            ) === undefined)
+        ) {
           continue;
         }
         if (v.length >= 3 && v[0] === v[1]) {
@@ -529,7 +545,7 @@ export const YAKU = {
     han: 2,
     isMenzenOnly: true,
     isFuroMinus: false,
-    check: (o: Riichi) => o.extra.doubleRiichi && !o.furo.length,
+    check: (o: Riichi) => o.extra.doubleRiichi && !o.furo.filter((v) => 1 / v[0] > 0).length,
   },
   ittsu: {
     isLocal: false,
@@ -572,7 +588,7 @@ export const YAKU = {
           continue;
         }
         // collect shutsu count starting at current tile
-        res[Math.floor(v[0] / 9)][Math.round((v[0] % 9) / 3)]++;
+        res[Math.floor(v[0] / 9)][v[0] % 9]++;
       }
 
       for (let i = 0; i < 9; i++) {
@@ -623,23 +639,42 @@ export const YAKU = {
           if (v[0] === o.takenTile) {
             hasPairFu = true;
           }
-        } else if (v.length === 3 && v[0] === v[1]) {
-          fu += is19(v[0]) ? 4 : 2;
-        }
-      }
-
-      if (hasPairFu) {
-        // check if taken tile can be considered as an edge wait for any shuntsu in hand
-        for (let v of o.currentPattern ?? []) {
-          if (v.length === 3 && v[0] !== v[1]) {
-            if (o.takenTile === v[0] || o.takenTile === v[2]) {
-              hasPairFu = false;
-            }
+        } else if (v.length === 3) {
+          if (v[0] === v[1]) {
+            fu += is19(v[0]) ? 4 : 2;
           }
         }
       }
 
-      if (hasPairFu) {
+      // check kanchan/penchan
+      let canBeRyanmen = false;
+      let canBeShanpon = false;
+      let canBeTanki = false;
+      if (o.takenTile !== null && o.takenTile !== undefined) {
+        for (let v of o.currentPattern ?? []) {
+          if (v.length !== 3) {
+            if (v.length === 2 && o.takenTile === v[0]) {
+              // tanki waits are already handled above
+              canBeTanki = true;
+            }
+            continue;
+          }
+
+          if (v[0] === v[1] && v[0] === o.takenTile) {
+            canBeShanpon = true;
+          }
+
+          if ((v[0] === o.takenTile && !is19(v[2])) || (v[2] === o.takenTile && !is19(v[0]))) {
+            canBeRyanmen = true;
+          }
+        }
+
+        if (!canBeShanpon && !canBeRyanmen && !canBeTanki) {
+          fu += 2;
+        }
+      }
+
+      if (hasPairFu && !canBeRyanmen) {
         fu += 2;
       }
 

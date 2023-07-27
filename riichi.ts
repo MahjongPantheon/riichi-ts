@@ -3,9 +3,6 @@ import { hairi } from './shanten';
 import { YAKU } from './yaku';
 import { ceil10, ceil100, is19, isProperOpenSet } from './interfaces';
 
-// TODO: next: make unit tests for hands;
-// TODO: next2: add testing with tenhou logs
-
 type Options = {
   dora?: number[];
   firstTake?: boolean; // tenhou/chihou/renhou
@@ -31,6 +28,8 @@ type Result = {
   hairi?: ReturnType<typeof hairi>;
   hairi7and13?: ReturnType<typeof hairi>;
 };
+
+const sortByInt = (a1: number, a2: number) => a1 - a2;
 
 export class Riichi {
   public hai: number[] = [];
@@ -92,7 +91,10 @@ export class Riichi {
     ippatsu?: boolean,
     doubleRiichi?: boolean,
     lastTile?: boolean,
-    afterKan?: boolean
+    afterKan?: boolean,
+    akaCount?: number,
+    allowAka?: boolean,
+    allowKuitan?: boolean
   ) {
     this.extra.firstTake = firstTake ?? false;
     this.extra.riichi = riichi ?? false;
@@ -100,12 +102,13 @@ export class Riichi {
     this.extra.doubleRiichi = doubleRiichi ?? false;
     this.extra.lastTile = lastTile ?? false;
     this.extra.afterKan = afterKan ?? false;
-    this.hai = closedPart.sort();
-    // TODO: introduce aka
-    // this.aka += closedParsed.aka;
+    this.allowAka = allowAka ?? false;
+    this.allowKuitan = allowKuitan ?? false;
+    this.hai = closedPart;
+    this.aka += akaCount ?? 0;
 
     this.dora = options.dora ?? [];
-    if (tileDiscardedBySomeone !== undefined) {
+    if (tileDiscardedBySomeone !== undefined && tileDiscardedBySomeone !== null) {
       this.takenTile = tileDiscardedBySomeone;
       this.hai.push(this.takenTile);
       this.isTsumo = false;
@@ -115,7 +118,7 @@ export class Riichi {
 
     for (let vv of openPart) {
       if (isProperOpenSet(vv.tiles)) {
-        this.furo.push([...vv.tiles.map((v) => (vv.open ? v : -v))].sort());
+        this.furo.push([...vv.tiles.map((v) => (vv.open ? v : -v))].sort(sortByInt));
       } else {
         // TODO: not sure this is proper; there shouldn't be any incorrect sets
         this.hai = this.hai.concat(vv.tiles);
@@ -145,6 +148,11 @@ export class Riichi {
   isMenzen() {
     for (let v of this.furo) {
       if (v.length > 2) {
+        // closed kan
+        if (v[0] === v[1] && 1 / v[0] < 0) {
+          // hack: check infinity sign to support 1m closed kan
+          continue;
+        }
         return false;
       }
     }
@@ -158,15 +166,21 @@ export class Riichi {
 
     let dora = 0;
     for (let v of this.hai) {
-      if (this.dora.includes(v)) {
-        dora++;
+      for (let d of this.dora) {
+        // loop over to detect multiple dora
+        if (v === d) {
+          dora++;
+        }
       }
     }
 
     for (let v of this.furo) {
       for (let vv of v) {
-        if (this.dora.includes(vv)) {
-          dora++;
+        for (let d of this.dora) {
+          // loop over to detect multiple dora
+          if (Math.abs(vv) === d) {
+            dora++;
+          }
         }
       }
     }
@@ -203,26 +217,90 @@ export class Riichi {
         }
       }
     }
-    this.tmpResult.ten = ceil100(base * 6);
+
+    this.tmpResult.text += (this.tmpResult.name ? ' ' : '') + this.tmpResult.name;
+    let oya = 0;
+    let ko = 0;
+    if (this.isTsumo) {
+      oya = ceil100(base * 2) + ceil100(base * 2) + ceil100(base * 2);
+      ko = ceil100(base * 2) + ceil100(base) + ceil100(base);
+    } else {
+      oya = ceil100(base * 6);
+      ko = ceil100(base * 4);
+    }
+    this.tmpResult.ten = this.jikaze === 27 ? oya : ko;
   }
 
-  calcFu() {
+  calcFu(haiExceptFuro: number[][], havePinfu = false) {
     let fu: number;
     if (this.tmpResult.yaku.chiitoitsu) {
       fu = 25;
+    } else if (this.tmpResult.yaku.kokushimusou || this.tmpResult.yaku['kokushimusou 13 sides']) {
+      fu = 0;
     } else if (this.tmpResult.yaku.pinfu) {
       fu = this.isTsumo ? 20 : 30;
     } else {
       fu = 20;
-      if (!this.isTsumo && this.isMenzen()) fu += 10;
+      if (!this.isTsumo && this.isMenzen()) {
+        fu += 10;
+      }
       if (!this.currentPattern) {
         return;
       }
 
-      for (let v of this.currentPattern) {
+      // check waiting
+      let canBeRyanmen = false;
+      let canBeKanchan = false;
+      let canBePenchan = false;
+      let canBeShanpon = false;
+      let canBeTanki = false;
+      if (this.takenTile !== undefined && this.takenTile !== null) {
+        for (let v of haiExceptFuro ?? []) {
+          if (v.length !== 3) {
+            if (v.length === 2 && this.takenTile === v[0]) {
+              // tanki waits are already handled above
+              canBeTanki = true;
+            }
+            continue;
+          }
+
+          if (v[0] === v[1]) {
+            if (v[0] === this.takenTile) {
+              canBeShanpon = true;
+            }
+          } else {
+            if (
+              (v[0] === this.takenTile && !is19(v[2])) ||
+              (v[2] === this.takenTile && !is19(v[0]))
+            ) {
+              canBeRyanmen = true;
+            }
+
+            if (
+              (v[0] === this.takenTile && is19(v[2])) ||
+              (v[2] === this.takenTile && is19(v[0]))
+            ) {
+              canBePenchan = true;
+            }
+
+            if (v[1] === this.takenTile) {
+              canBeKanchan = true;
+            }
+          }
+        }
+      }
+
+      for (let v of this.furo) {
         if (v.length === 4) {
-          fu += is19(Math.abs(v[0])) ? (v[0] > 0 ? 16 : 32) : v[0] > 0 ? 8 : 16;
-        } else if (v.length === 2) {
+          // hack: count infinity sign to support closed kan of 1m
+          fu += is19(Math.abs(v[0])) ? (1 / v[0] > 0 ? 16 : 32) : 1 / v[0] > 0 ? 8 : 16;
+        } else if (v.length === 3 && v[0] === v[1]) {
+          fu += is19(v[0]) ? 4 : 2;
+        }
+      }
+
+      for (let v of haiExceptFuro) {
+        if (v.length === 2) {
           if ([this.bakaze, this.jikaze, 31, 32, 33].includes(v[0])) {
             // pair of yakuhai tile
             fu += 2;
@@ -235,7 +313,23 @@ export class Riichi {
             fu += 2; // fu for tanki agari
           }
         } else if (v.length === 3 && v[0] === v[1]) {
-          fu += is19(v[0]) ? 4 : 2;
+          if (!this.isTsumo && this.takenTile === v[0]) {
+            if (canBeRyanmen || canBeKanchan || canBePenchan) {
+              fu += is19(v[0]) ? 8 : 4;
+            } else {
+              fu += is19(v[0]) ? 4 : 2;
+            }
+          } else {
+            fu += is19(v[0]) ? 8 : 4;
+          }
+        }
+      }
+
+      if (canBePenchan || canBeKanchan) {
+        if (!havePinfu && !canBeTanki) {
+          fu += 2;
+        } else if (!canBeShanpon && !canBeRyanmen && !canBeTanki) {
+          fu += 2;
         }
       }
 
@@ -352,18 +446,21 @@ export class Riichi {
         continue;
       }
 
-      if (this.tmpResult.han) {
+      if (this.tmpResult.han || this.tmpResult.yakuman > 0) {
         this.calcDora();
-        this.calcFu();
+        this.calcFu(v, !!this.tmpResult.yaku.pinfu);
       }
 
       this.calcTen();
       // Find variant with maximum points
-      if (this.tmpResult.ten > (this.finalResult?.ten ?? 0)) {
-        this.finalResult = JSON.parse(JSON.stringify(this.tmpResult));
-      } else if (
-        this.tmpResult.ten === this.finalResult?.ten &&
-        this.tmpResult.han > this.finalResult?.han
+
+      if (
+        this.tmpResult.ten > (this.finalResult?.ten ?? 0) ||
+        (this.tmpResult.ten === this.finalResult?.ten &&
+          this.tmpResult.han > this.finalResult?.han) ||
+        (this.tmpResult.ten === this.finalResult?.ten &&
+          this.tmpResult.han === this.finalResult?.han &&
+          this.tmpResult.fu > this.finalResult?.fu)
       ) {
         this.finalResult = JSON.parse(JSON.stringify(this.tmpResult));
       }
