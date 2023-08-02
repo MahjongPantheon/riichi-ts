@@ -12,8 +12,8 @@ Type definitions for typescript are included in the package.
 Tiles are defined by a single integer number according to the following table:
 
 - Man suit: `0` is 1man, ... `8` is 9man
-- Pin suit: `9` is 1man, ... `17` is 9man
-- Sou suit: `18` is 1man, ... `26` is 9man
+- Pin suit: `9` is 1pin, ... `17` is 9pin
+- Sou suit: `18` is 1sou, ... `26` is 9sou
 - Honors:
   - Winds: `27` is east, ...  `30` is north
   - Dragons: `31` is white, `32` is green, `33` is red
@@ -147,4 +147,4 @@ Inspired by and partially taken from following repositories:
 
 The library was tested against millions of real-life game logs from Tenhou.net phoenix lobby. Though we don't supply these logs in the repo, you can still download it on Tenhou.net and use it for testing.
 
-Please place zip archives with real replay logs into `logs` folder. The testing script will travers over all zip files there and will try to parse every replay file found.
+Please place zip archives with real replay logs into `logs` folder. The testing script will traverse over all zip files there and will try to parse every replay file found.
