@@ -50,7 +50,8 @@ describe('Real games data', () => {
                 data.yaku.includes('rinshan') || data.yaku.includes('chankan'),
                 data.aka,
                 data.withAka,
-                data.withKuitan
+                data.withKuitan,
+                data.withKiriage
               );
               r.disableDoubleyakuman();
               const res = r.calc();

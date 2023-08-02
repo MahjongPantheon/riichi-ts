@@ -78,6 +78,7 @@ export class Riichi {
   public disabled: string[] = [];
   public allowDoubleYakuman = true;
   public allowKuitan = true;
+  public withKiriage = false;
   public allowAka = true;
   public hairi = true;
 
@@ -94,7 +95,8 @@ export class Riichi {
     afterKan?: boolean,
     akaCount?: number,
     allowAka?: boolean,
-    allowKuitan?: boolean
+    allowKuitan?: boolean,
+    withKiriage?: boolean
   ) {
     this.extra.firstTake = firstTake ?? false;
     this.extra.riichi = riichi ?? false;
@@ -104,6 +106,7 @@ export class Riichi {
     this.extra.afterKan = afterKan ?? false;
     this.allowAka = allowAka ?? false;
     this.allowKuitan = allowKuitan ?? false;
+    this.withKiriage = withKiriage ?? false;
     this.hai = closedPart;
     this.aka += akaCount ?? 0;
 
@@ -213,6 +216,14 @@ export class Riichi {
         } else if (this.tmpResult.han >= 6) {
           base = 3000;
         } else {
+          base = 2000;
+        }
+      } else {
+        if (
+          this.withKiriage &&
+          ((this.tmpResult.han === 4 && this.tmpResult.fu === 30) ||
+            (this.tmpResult.han === 3 && this.tmpResult.fu === 60))
+        ) {
           base = 2000;
         }
       }

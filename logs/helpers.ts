@@ -164,6 +164,7 @@ export const prepareTestData = (content: string) => {
   let foundHands = 0;
   let withAka = false;
   let withKuitan = false;
+  let withKiriage = false;
   let hands: Array<{
     openPart: number[][];
     closedPart: number[];
@@ -180,8 +181,10 @@ export const prepareTestData = (content: string) => {
     aka: number;
     withAka: boolean;
     withKuitan: boolean;
+    withKiriage: boolean;
   }> = [];
   let isSanma = false;
+  let hasChips = false;
   const parser = new Parser({
     onopentag(name: string, attribs: { [p: string]: string }) {
       switch (name) {
@@ -196,8 +199,11 @@ export const prepareTestData = (content: string) => {
             break;
           }
           const type = parseInt(attribs.type, 10);
+          const lobby = parseInt(attribs.lobby ?? 0, 10);
           withAka = !(type & 0x2);
           withKuitan = !(type & 0x4);
+          withKiriage = !!(type & 0x800) || !!(lobby & 0x2000);
+          hasChips = !!(type & 0x600);
           break;
         case 'init':
           if (attribs.oya === undefined || isSanma) {
@@ -209,7 +215,7 @@ export const prepareTestData = (content: string) => {
           currentDealer = parseInt(attribs.oya, 10);
           break;
         case 'agari':
-          if (isSanma) {
+          if (isSanma || hasChips) {
             break;
           }
           const hai = attribs.hai.split(',').map((t) => parseInt(t, 10));
@@ -313,6 +319,7 @@ export const prepareTestData = (content: string) => {
             aka: akaCount,
             withAka: withAka,
             withKuitan: withKuitan,
+            withKiriage: withKiriage,
           });
           akaCount = 0;
           break;
