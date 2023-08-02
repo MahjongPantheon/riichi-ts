@@ -199,10 +199,9 @@ export const prepareTestData = (content: string) => {
             break;
           }
           const type = parseInt(attribs.type, 10);
-          const lobby = parseInt(attribs.lobby ?? 0, 10);
           withAka = !(type & 0x2);
           withKuitan = !(type & 0x4);
-          withKiriage = !!(type & 0x800) || !!(lobby & 0x2000);
+          withKiriage = !!(type & 0x800);
           hasChips = !!(type & 0x600);
           break;
         case 'init':
