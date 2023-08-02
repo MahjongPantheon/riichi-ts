@@ -1,9 +1,9 @@
 {
   "name": "riichi-ts",
-  "version": "1.0.1",
+  "version": "1.0.6",
   "description": "Riichi mahjong calculations library",
-  "type": "module",
-  "module": "index.ts",
+  "module": "dist/index.js",
+  "main": "dist/index.js",
   "license": "GPL-3.0-or-later",
   "scripts": {
     "build": "tsc -p .",
@@ -30,5 +30,20 @@
     "ts-node": "^10.9.1",
     "typescript": "^4.9.5",
     "yauzl-promise": "^4.0.0"
-  }
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/MahjongPantheon/riichi-ts.git"
+  },
+  "keywords": [
+    "riichi",
+    "mahjong",
+    "shanten",
+    "hairi"
+  ],
+  "author": "ctizen <me@ctizen.dev>",
+  "bugs": {
+    "url": "https://github.com/MahjongPantheon/riichi-ts/issues"
+  },
+  "homepage": "https://github.com/MahjongPantheon/riichi-ts#readme"
 }

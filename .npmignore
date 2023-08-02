@@ -1,9 +1,17 @@
+*.ts
+!*.d.ts
 dist/*.test.js
+dist/*.test.d.ts
+dist/*.map
 tsconfig.json
 jest.config.js
 .eslintignore
 .eslintrc.cjs
+.editorconfig
+.prettierignore
+.prettierrc
 .idea/
+logs/
 
 # misc
 .DS_Store
