@@ -145,6 +145,6 @@ Inspired by and partially taken from following repositories:
 
 ### Testing on real games data
 
-The library was tested against millions of real-life game logs from Tenhou.net phoenix lobby. Though we don't supply these logs in the repo, you can still download it on Tenhou.net and use it for testing.
+The library was tested against over 19 million of hands from real-life game logs from Tenhou.net phoenix lobby. Though we don't supply these logs in the repo, you can still download it on Tenhou.net and use it for testing.
 
 Please place zip archives with real replay logs into `logs` folder. The testing script will traverse over all zip files there and will try to parse every replay file found.
