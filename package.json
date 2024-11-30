@@ -1,6 +1,6 @@
 {
   "name": "riichi-ts",
-  "version": "1.0.7",
+  "version": "1.0.8",
   "description": "Riichi mahjong calculations library",
   "module": "dist/index.js",
   "main": "dist/index.js",
