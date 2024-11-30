@@ -22,6 +22,7 @@ type Result = {
   han: number;
   fu: number;
   ten: number;
+  outgoingTen?: { oya: number; ko: number };
   name: string;
   text: string;
   error: boolean;
@@ -232,9 +233,12 @@ export class Riichi {
     this.tmpResult.text += (this.tmpResult.name ? ' ' : '') + this.tmpResult.name;
     let oya = 0;
     let ko = 0;
+    let outgoing = { oya: 0, ko: 0 };
     if (this.isTsumo) {
       oya = ceil100(base * 2) + ceil100(base * 2) + ceil100(base * 2);
       ko = ceil100(base * 2) + ceil100(base) + ceil100(base);
+      outgoing = { oya: ceil100(base * 2), ko: ceil100(base) };
+      this.tmpResult.outgoingTen = outgoing;
     } else {
       oya = ceil100(base * 6);
       ko = ceil100(base * 4);
