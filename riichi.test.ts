@@ -531,4 +531,28 @@ describe('Should return proper yaku data', () => {
       yakuman: 0,
     });
   });
+  it('Should parse Daisangen', () => {
+    const r = new Riichi(
+      [p4, p4, p4, m1],
+      [
+        { open: true, tiles: [wd, wd, wd] },
+        { open: true, tiles: [gd, gd, gd] },
+        { open: true, tiles: [rd, rd, rd] },
+      ],
+      { bakaze: e, jikaze: w },
+      m1
+    );
+    const res = r.calc();
+    assert.deepStrictEqual(res, {
+      error: false,
+      fu: 40,
+      han: 0,
+      isAgari: true,
+      name: '',
+      ten: 32000,
+      text: '',
+      yaku: { daisangen: 13 },
+      yakuman: 1,
+    });
+  });
 });
