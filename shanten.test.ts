@@ -1219,6 +1219,20 @@ describe('Should calculate shanten', () => {
     assert.deepEqual(hairi(hand), { now: 1, wait: [18, 19, 20, 21, 22, 23, 24] });
   });
 
+  it('Should calculate hairi in tempai hand with one excessive tile (for riichi)', () => {
+    const hand = new Int8Array(
+      // prettier-ignore
+      [ 2, 2, 2, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 1, 1, 1, 0, 0,
+        0, 0, 1, 1, 1, 1, 1, 0, 0,
+        0, 0, 0, 0, 0, 0, 0 ]
+    );
+    assert.deepEqual(hairi(hand), {
+      now: 0,
+      waitsAfterDiscard: { 20: [21, 24], 21: [20], 23: [24], 24: [20, 23] },
+    });
+  });
+
   it('Should calculate hairi in partial hand', () => {
     const hand = new Int8Array(
       // prettier-ignore
