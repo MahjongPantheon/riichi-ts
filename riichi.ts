@@ -120,7 +120,7 @@ export class Riichi {
       this.takenTile = this.hai.slice(-1)[0];
     }
 
-    for (let vv of openPart) {
+    for (const vv of openPart) {
       if (isProperOpenSet(vv.tiles)) {
         this.furo.push([...vv.tiles.map((v) => (vv.open ? v : -v))].sort(sortByInt));
       } else {
@@ -139,7 +139,7 @@ export class Riichi {
       return;
     }
 
-    for (let v of this.hai) {
+    for (const v of this.hai) {
       this.haipai[v]++;
     }
 
@@ -150,7 +150,7 @@ export class Riichi {
   }
 
   isMenzen() {
-    for (let v of this.furo) {
+    for (const v of this.furo) {
       if (v.length > 2) {
         // closed kan
         if (v[0] === v[1] && 1 / v[0] < 0) {
@@ -169,8 +169,8 @@ export class Riichi {
     }
 
     let dora = 0;
-    for (let v of this.hai) {
-      for (let d of this.dora) {
+    for (const v of this.hai) {
+      for (const d of this.dora) {
         // loop over to detect multiple dora
         if (v === d) {
           dora++;
@@ -178,9 +178,9 @@ export class Riichi {
       }
     }
 
-    for (let v of this.furo) {
-      for (let vv of v) {
-        for (let d of this.dora) {
+    for (const v of this.furo) {
+      for (const vv of v) {
+        for (const d of this.dora) {
           // loop over to detect multiple dora
           if (Math.abs(vv) === d) {
             dora++;
@@ -270,7 +270,7 @@ export class Riichi {
       let canBeShanpon = false;
       let canBeTanki = false;
       if (this.takenTile !== undefined && this.takenTile !== null) {
-        for (let v of haiExceptFuro ?? []) {
+        for (const v of haiExceptFuro ?? []) {
           if (v.length !== 3) {
             if (v.length === 2 && this.takenTile === v[0]) {
               // tanki waits are already handled above
@@ -305,7 +305,7 @@ export class Riichi {
         }
       }
 
-      for (let v of this.furo) {
+      for (const v of this.furo) {
         if (v.length === 4) {
           // hack: count infinity sign to support closed kan of 1m
           fu += is19(Math.abs(v[0])) ? (1 / v[0] > 0 ? 16 : 32) : 1 / v[0] > 0 ? 8 : 16;
@@ -314,7 +314,7 @@ export class Riichi {
         }
       }
 
-      for (let v of haiExceptFuro) {
+      for (const v of haiExceptFuro) {
         if (v.length === 2) {
           if ([this.bakaze, this.jikaze, 31, 32, 33].includes(v[0])) {
             // pair of yakuhai tile
@@ -365,8 +365,8 @@ export class Riichi {
     this.tmpResult.yaku = {};
     this.tmpResult.yakuman = 0;
     this.tmpResult.han = 0;
-    for (let k in YAKU) {
-      let v = YAKU[k as keyof typeof YAKU];
+    for (const k in YAKU) {
+      const v = YAKU[k as keyof typeof YAKU];
       if (this.disabled.includes(k)) {
         continue;
       }
@@ -381,7 +381,7 @@ export class Riichi {
       }
       if (v.check(this)) {
         if (v.yakuman) {
-          let n = this.allowDoubleYakuman ? v.yakuman : 1;
+          const n = this.allowDoubleYakuman ? v.yakuman : 1;
           this.tmpResult.yakuman += n;
           this.tmpResult.yaku[k] = n > 1 ? 26 : 13; // count double yakuman as 26 han
         } else {
@@ -454,7 +454,7 @@ export class Riichi {
     this.finalResult.isAgari = true;
     this.agariPatterns = findAllAgariPatterns(this.haipai);
 
-    for (let v of this.agariPatterns) {
+    for (const v of this.agariPatterns) {
       this.currentPattern = [...v, ...this.furo];
       this.calcYaku();
       if (!this.tmpResult.yakuman && !this.tmpResult.han) {

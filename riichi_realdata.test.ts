@@ -9,7 +9,7 @@ let failed = 0;
 let success = 0;
 let total = 0;
 let logsProcessed = 0;
-let failedLogs: string[] = [];
+const failedLogs: string[] = [];
 
 describe('Real games data', () => {
   it(
@@ -23,7 +23,7 @@ describe('Real games data', () => {
         }
         await readZipFile(item, 0, (filename, content) => {
           const hands = prepareTestData(content);
-          for (let idx in hands) {
+          for (const idx in hands) {
             const data = hands[idx];
             try {
               const r = new Riichi(

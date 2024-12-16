@@ -4,13 +4,13 @@ import { Riichi } from './riichi';
 import { digest, is19, sliceBySuit, sum } from './interfaces';
 
 const checkAllowed = (o: Riichi, allowed: number[]) => {
-  for (let v of o.hai) {
+  for (const v of o.hai) {
     if (!allowed.includes(v)) {
       return false;
     }
   }
-  for (let v of o.furo) {
-    for (let vv of v) {
+  for (const v of o.furo) {
+    for (const vv of v) {
       if (!allowed.includes(Math.abs(vv))) {
         return false;
       }
@@ -28,7 +28,7 @@ const toHand = (pattern: number[][]) => {
       0, 0, 0, 0, 0, 0, 0, 0, 0,
       0, 0, 0, 0, 0, 0, 0]
   );
-  for (let tile of occurences) {
+  for (const tile of occurences) {
     hand[Math.abs(tile)]++;
   }
   return hand;
@@ -38,7 +38,7 @@ const toHand = (pattern: number[][]) => {
 const getSameSuit = (o: Riichi, excludeHonors = false) => {
   let foundSuit = -1;
   const slices = sliceBySuit(toHand(o.currentPattern ?? []));
-  for (let i in slices) {
+  for (const i in slices) {
     if (sum(slices[i]) === 0) {
       continue;
     }
@@ -56,7 +56,7 @@ const getSameSuit = (o: Riichi, excludeHonors = false) => {
 
 const checkChanta = (o: Riichi, allow: number[]) => {
   let hasJyuntsu = false;
-  for (let v of o.currentPattern ?? []) {
+  for (const v of o.currentPattern ?? []) {
     if (v.length <= 2 || v[0] === v[1]) {
       if (!allow.includes(Math.abs(v[0]))) {
         return false;
@@ -78,7 +78,7 @@ const checkChanta = (o: Riichi, allow: number[]) => {
 };
 
 const checkYakuhai = (o: Riichi, which: number) => {
-  for (let v of o.currentPattern ?? []) {
+  for (const v of o.currentPattern ?? []) {
     if (
       Math.abs(v[0]) === which &&
       [o.jikaze, o.bakaze, 31, 32, 33].includes(Math.abs(v[0])) &&
@@ -171,7 +171,7 @@ export const YAKU = {
         }
       }
       let kotsu = 0;
-      for (let v of o.currentPattern ?? []) {
+      for (const v of o.currentPattern ?? []) {
         if (v.length >= 3 && v[0] === v[1]) {
           kotsu++;
         } else {
@@ -197,7 +197,7 @@ export const YAKU = {
         }
       }
       let kotsu = 0;
-      for (let v of o.currentPattern ?? []) {
+      for (const v of o.currentPattern ?? []) {
         if (v.length >= 3 && v[0] === v[1]) {
           kotsu++;
         }
@@ -213,9 +213,9 @@ export const YAKU = {
     isMenzenOnly: false,
     isFuroMinus: false,
     check: (o: Riichi) => {
-      let need = [27, 28, 29, 30];
+      const need = [27, 28, 29, 30];
       let res = 0;
-      for (let v of o.currentPattern ?? []) {
+      for (const v of o.currentPattern ?? []) {
         if (need.includes(Math.abs(v[0])) && v.length >= 3) {
           res++;
         }
@@ -230,10 +230,10 @@ export const YAKU = {
     isMenzenOnly: false,
     isFuroMinus: false,
     check: (o: Riichi) => {
-      let need = [27, 28, 29, 30];
+      const need = [27, 28, 29, 30];
       let kotsu = 0;
       let toitsu = 0;
-      for (let v of o.currentPattern ?? []) {
+      for (const v of o.currentPattern ?? []) {
         if (need.includes(Math.abs(v[0])) && v.length >= 3) {
           kotsu++;
         }
@@ -251,9 +251,9 @@ export const YAKU = {
     isMenzenOnly: false,
     isFuroMinus: false,
     check: (o: Riichi) => {
-      let need = [31, 32, 33];
+      const need = [31, 32, 33];
       let kotsu = 0;
-      for (let v of o.currentPattern ?? []) {
+      for (const v of o.currentPattern ?? []) {
         if (need.includes(Math.abs(v[0])) && v.length >= 3) {
           kotsu++;
         }
@@ -293,7 +293,7 @@ export const YAKU = {
     isFuroMinus: false,
     check: (o: Riichi) => {
       let kantsu = 0;
-      for (let v of o.currentPattern ?? []) {
+      for (const v of o.currentPattern ?? []) {
         if (v.length === 4) {
           kantsu++;
         }
@@ -366,11 +366,11 @@ export const YAKU = {
     isMenzenOnly: true,
     isFuroMinus: false,
     check: (o: Riichi) => {
-      let arr: Record<string, number> = {};
+      const arr: Record<string, number> = {};
       if (o.furo.length > 0) {
         return false;
       }
-      for (let v of o.currentPattern ?? []) {
+      for (const v of o.currentPattern ?? []) {
         if (v.length >= 3 && v[0] === v[1]) {
           return false;
         }
@@ -410,7 +410,7 @@ export const YAKU = {
     isFuroMinus: false,
     check: (o: Riichi) => {
       let kotsu = 0;
-      for (let v of o.currentPattern ?? []) {
+      for (const v of o.currentPattern ?? []) {
         if (v.length >= 3 && v[0] === v[1]) {
           kotsu++;
         }
@@ -434,7 +434,7 @@ export const YAKU = {
     isFuroMinus: false,
     check: (o: Riichi) => {
       let kantsu = 0;
-      for (let v of o.currentPattern ?? []) {
+      for (const v of o.currentPattern ?? []) {
         if (v.length === 4) {
           kantsu++;
         }
@@ -449,9 +449,9 @@ export const YAKU = {
     han: 2,
     isFuroMinus: false,
     check: (o: Riichi) => {
-      let need = [31, 32, 33];
+      const need = [31, 32, 33];
       let kotsuOrToitsu = 0;
-      for (let v of o.currentPattern ?? []) {
+      for (const v of o.currentPattern ?? []) {
         if (need.includes(Math.abs(v[0])) && v[0] === v[1]) {
           kotsuOrToitsu++;
         }
@@ -466,8 +466,8 @@ export const YAKU = {
     han: 2,
     isFuroMinus: false,
     check: (o: Riichi) => {
-      let res: Record<number, number> = {};
-      for (let v of o.currentPattern ?? []) {
+      const res: Record<number, number> = {};
+      for (const v of o.currentPattern ?? []) {
         if (
           v.length >= 3 &&
           v[0] === v[1] &&
@@ -494,8 +494,8 @@ export const YAKU = {
       let kotsu = 0;
 
       // keep here all tiles that are not closed kantsu
-      let openKotsu = new Set();
-      for (let k of o.furo) {
+      const openKotsu = new Set();
+      for (const k of o.furo) {
         if (1 / k[0] > 0 && k[0] === k[1]) {
           // workaround: use 1/k[0] because we can have -0 as a valid value for closed 1m kan
           openKotsu.add(k[0]);
@@ -505,7 +505,7 @@ export const YAKU = {
       const closedPart = o.currentPattern?.filter(
         (set) => o.furo.find((meld) => digest([set]) === digest([meld])) === undefined
       );
-      for (let v of o.currentPattern ?? []) {
+      for (const v of o.currentPattern ?? []) {
         if (
           openKotsu.has(v[0]) ||
           (v.length >= 3 &&
@@ -554,12 +554,12 @@ export const YAKU = {
     han: 2,
     isFuroMinus: true,
     check: (o: Riichi) => {
-      let res = [
+      const res = [
         new Int8Array([0, 0, 0]), // man shuntsu
         new Int8Array([0, 0, 0]), // pin shuntsu
         new Int8Array([0, 0, 0]), // sou shuntsu
       ];
-      for (let v of o.currentPattern ?? []) {
+      for (const v of o.currentPattern ?? []) {
         if (v[0] === v[1]) {
           continue;
         }
@@ -577,13 +577,13 @@ export const YAKU = {
     han: 2,
     isFuroMinus: true,
     check: (o: Riichi) => {
-      let res = [
+      const res = [
         new Int8Array([0, 0, 0, 0, 0, 0, 0, 0, 0]), // man shuntsu
         new Int8Array([0, 0, 0, 0, 0, 0, 0, 0, 0]), // pin shuntsu
         new Int8Array([0, 0, 0, 0, 0, 0, 0, 0, 0]), // sou shuntsu
       ];
 
-      for (let v of o.currentPattern ?? []) {
+      for (const v of o.currentPattern ?? []) {
         if (v[0] === v[1]) {
           continue;
         }
@@ -628,7 +628,7 @@ export const YAKU = {
       }
       let fu = 0;
       let hasPairFu = false;
-      for (let v of o.currentPattern ?? []) {
+      for (const v of o.currentPattern ?? []) {
         if (v.length === 4) {
           fu += is19(Math.abs(v[0])) ? (v[0] > 0 ? 16 : 32) : v[0] > 0 ? 8 : 16;
         } else if (v.length === 2) {
@@ -651,7 +651,7 @@ export const YAKU = {
       let canBeShanpon = false;
       let canBeTanki = false;
       if (o.takenTile !== null && o.takenTile !== undefined) {
-        for (let v of o.currentPattern ?? []) {
+        for (const v of o.currentPattern ?? []) {
           if (v.length !== 3) {
             if (v.length === 2 && o.takenTile === v[0]) {
               // tanki waits are already handled above
@@ -689,9 +689,9 @@ export const YAKU = {
     isFuroMinus: false,
     check: (o: Riichi) => {
       if (YAKU.ryanpeikou.check(o)) return false;
-      for (let idx in o.currentPattern) {
+      for (const idx in o.currentPattern) {
         let i = parseInt(idx);
-        let v = o.currentPattern[i];
+        const v = o.currentPattern[i];
         if (v.length === 3 && v[0] != v[1]) {
           while (i < 4) {
             i++;
@@ -737,7 +737,7 @@ export const YAKU = {
     isFuroMinus: false,
     check: (o: Riichi) => {
       let hasKantsu = false;
-      for (let v of o.furo) {
+      for (const v of o.furo) {
         if (v.length === 4) {
           hasKantsu = true;
           break;

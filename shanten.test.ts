@@ -1176,7 +1176,7 @@ describe('Should calculate shanten', () => {
         ),
         item[1],
       ];
-      for (let v of item[0]) {
+      for (const v of item[0]) {
         ret[0][v]++;
       }
       return ret;
@@ -1184,7 +1184,7 @@ describe('Should calculate shanten', () => {
 
     let error = 0;
     // console.time();
-    for (let v of input) {
+    for (const v of input) {
       try {
         assert.deepStrictEqual(shanten(v[0]), v[1]);
       } catch (e: any) {

@@ -4,23 +4,23 @@ import { digest, KOKUSHI_IDX, sliceBySuit, SUIT, sum, sumArr, VAL } from './inte
 
 export const check7 = (haipai: Int8Array) => {
   let s = 0;
-  for (let i = 0; i < haipai.length; i++) {
-    if (haipai[i] && haipai[i] != 2) {
+  for (const hai of haipai) {
+    if (hai && hai != 2) {
       return false;
     }
-    s += haipai[i];
+    s += hai;
   }
   return s == 14;
 };
 
 export const check13 = (haipai: Int8Array) => {
-  let arr = KOKUSHI_IDX.map((i) => haipai[i]);
+  const arr = KOKUSHI_IDX.map((i) => haipai[i]);
   return !arr.includes(0) && sumArr(arr) == 14;
 };
 
 const _check = (haipai: Int8Array, isJihai = false) => {
   haipai = haipai.slice(); // clone
-  let s = sum(haipai);
+  const s = sum(haipai);
   if (s === 0) {
     return true;
   }
@@ -95,7 +95,7 @@ export const checkAll = (haipai: Int8Array) => {
 // Doesn't find kantsu.
 // Mutates original array!
 export const findKotsu = (haipai: Int8Array) => {
-  let res = [];
+  const res = [];
   for (let i = 0; i < haipai.length; i++) {
     if (haipai[i] >= 3) {
       haipai[i] -= 3;
@@ -112,7 +112,7 @@ export const findKotsu = (haipai: Int8Array) => {
 // Finds arrays of indices in hand where shuntsu is detected
 // Mutates original array!
 export const findShuntsu = (haipai: Int8Array) => {
-  let res = [];
+  const res = [];
 
   // Don't consider honors (last 7).
   for (let i = 0; i < haipai.length - 7; i++) {
@@ -148,7 +148,7 @@ export const findShuntsu = (haipai: Int8Array) => {
 
 // Finds index of first set of repeated tiles or -1 otherwise
 // Skip excluded index - it's used below as fake pair
-export const findJanto = (haipai: Int8Array, exclude: number = -1) => {
+export const findJanto = (haipai: Int8Array, exclude = -1) => {
   for (let i = 0; i < haipai.length; i++) {
     if (haipai[i] >= 2 && i !== exclude) {
       return i;
@@ -159,12 +159,12 @@ export const findJanto = (haipai: Int8Array, exclude: number = -1) => {
 
 // Find hand split variant
 // Skip excluded index - it's used below as fake pair
-export const calc = (haipai: Int8Array, exclude: number = -1, realPair: number = -1) => {
+export const calc = (haipai: Int8Array, exclude = -1, realPair = -1) => {
   const res: number[][][] = [];
 
   // First pass: find kotsu, then shuntsu
   let clone = haipai.slice();
-  let kotsu = findKotsu(clone);
+  const kotsu = findKotsu(clone);
   if (sum(clone) === 2) {
     // toitoi-like
     const janto = realPair !== -1 ? realPair : findJanto(clone, exclude);
@@ -177,15 +177,15 @@ export const calc = (haipai: Int8Array, exclude: number = -1, realPair: number =
 
   // Second pass: find shuntsu, then kotsu
   clone = haipai.slice();
-  let shuntsu = findShuntsu(clone);
+  const shuntsu = findShuntsu(clone);
   if (sum(clone) === 2) {
     const janto = realPair !== -1 ? realPair : findJanto(clone, exclude);
     // pinfu-like
     res.push([...shuntsu, [janto, janto]]);
   } else {
-    const kotsu = findKotsu(clone);
+    const kotsuFound = findKotsu(clone);
     const janto = realPair !== -1 ? realPair : findJanto(clone, exclude);
-    res.push([...shuntsu, ...kotsu, [janto, janto]]);
+    res.push([...shuntsu, ...kotsuFound, [janto, janto]]);
   }
 
   return res;
@@ -228,7 +228,7 @@ export const findAllAgariPatterns = (haipai: Int8Array) => {
 
   // Some questionable code below :)
 
-  let fakePairIndex: number = -1;
+  let fakePairIndex = -1;
   for (let i = SUIT.HONOR * 9; i < 34; i++) {
     if (haipai[i] === 0) {
       // found first honor tile that is absent in hand
@@ -270,11 +270,11 @@ export const findAllAgariPatterns = (haipai: Int8Array) => {
   }
 
   // Finally we try to find and eliminate duplicate decompositions.
-  let finalRes = [];
-  for (let v of res) {
+  const finalRes = [];
+  for (const v of res) {
     let is_duplicate = false;
     const vDigest = digest(v);
-    for (let vv of finalRes) {
+    for (const vv of finalRes) {
       if (vDigest === digest(vv)) {
         is_duplicate = true;
       }

@@ -115,11 +115,11 @@ export const joinFromSuits = (suits: Int8Array[]) =>
 export const sumSuit = (haipai: Int8Array, suit: number) => {
   const lim = suit === SUIT.HONOR ? 7 : 9;
   const start = idx(suit, 0);
-  let sum = 0;
+  let suitsum = 0;
   for (let i = 0; i < lim; i++) {
-    sum += haipai[start + i];
+    suitsum += haipai[start + i];
   }
-  return sum;
+  return suitsum;
 };
 
 export const ceil10 = (num: number) => {
@@ -130,8 +130,8 @@ export const ceil100 = (num: number) => {
   return Math.ceil(num / 100) * 100;
 };
 
-export const is19 = (idx: number) => {
-  return KOKUSHI_IDX.includes(idx);
+export const is19 = (index: number) => {
+  return KOKUSHI_IDX.includes(index);
 };
 
 export const isProperOpenSet = (arr: number[]) => {
@@ -139,15 +139,15 @@ export const isProperOpenSet = (arr: number[]) => {
     return false;
   }
 
-  let set = new Set(arr); // unique
+  const set = new Set(arr); // unique
   if (set.size === 1) {
     return true;
   } else {
     if (set.size !== 3) {
       return false;
     }
-    let minus1 = arr[1] - arr[0];
-    let minus2 = arr[2] - arr[1];
+    const minus1 = arr[1] - arr[0];
+    const minus2 = arr[2] - arr[1];
     if (minus1 !== minus2 || minus1 !== 1) {
       return false;
     }

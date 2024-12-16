@@ -3,13 +3,13 @@
 import { KOKUSHI_IDX, RET, sum } from './interfaces';
 
 export const shanten13 = (haipai: Int8Array) => {
-  let cnt = sum(haipai);
+  const cnt = sum(haipai);
   if (cnt < 13 || cnt > 14) {
     return RET.WRONG_COUNT;
   }
   let singles = 0;
   let atLeastOnePair = 0;
-  for (let i of KOKUSHI_IDX) {
+  for (const i of KOKUSHI_IDX) {
     if (haipai[i] >= 1) {
       singles++;
     }
@@ -22,7 +22,7 @@ export const shanten13 = (haipai: Int8Array) => {
 };
 
 export const shanten7 = (haipai: Int8Array) => {
-  let cnt = sum(haipai);
+  const cnt = sum(haipai);
   if (cnt < 13 || cnt > 14) {
     return RET.WRONG_COUNT;
   }
@@ -130,7 +130,7 @@ export const shanten = (haipai: Int8Array) => {
   let furo = 0;
 
   const search = (arr: Int8Array, isJihai = false) => {
-    let tmp = searchHelper(arr, 0, isJihai, 0, 0, 0);
+    const tmp = searchHelper(arr, 0, isJihai, 0, 0, 0);
     mentsu += tmp[0];
     tatsu += tmp[1];
     singles += tmp[2];
@@ -163,10 +163,12 @@ export const shanten = (haipai: Int8Array) => {
       tmpRes++;
     }
     res = tmpRes < res ? tmpRes : res;
-    mentsu = tatsu = singles = 0;
+    mentsu = 0;
+    tatsu = 0;
+    singles = 0;
   };
 
-  let s = sum(haipai);
+  const s = sum(haipai);
   if (s > 14 || s % 3 === 0) {
     return RET.WRONG_COUNT;
   }
@@ -187,7 +189,7 @@ export const shanten = (haipai: Int8Array) => {
     if (haipai[i] === 0) {
       continue;
     }
-    let t = haipai.slice(); // clone
+    const t = haipai.slice(); // clone
     t[i] -= haipai[i] >= 2 ? 2 : haipai[i];
     search(t.slice(0, 9));
     search(t.slice(9, 18));
@@ -200,11 +202,11 @@ export const shanten = (haipai: Int8Array) => {
 };
 
 export const hairi = (haipai: Int8Array, is7or13 = false) => {
-  let shantenCalc = !is7or13
+  const shantenCalc = !is7or13
     ? shanten
     : (haiArr: Int8Array) => Math.min(shanten7(haiArr), shanten13(haiArr));
-  let sht = shantenCalc(haipai);
-  let res: { now: number; wait?: number[]; waitsAfterDiscard?: Record<number, number[]> } = {
+  const sht = shantenCalc(haipai);
+  const res: { now: number; wait?: number[]; waitsAfterDiscard?: Record<number, number[]> } = {
     now: sht,
   };
   if (sht === RET.WRONG_COUNT) {
