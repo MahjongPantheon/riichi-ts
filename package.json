@@ -8,6 +8,7 @@
   "scripts": {
     "build": "tsc -p .",
     "test": "jest",
+    "test:ci": "jest --collect-coverage --coverageProvider=v8",
     "lint": "eslint . && prettier -c .",
     "fix": "eslint . --fix && prettier -w .",
     "prepare": "npm run build"

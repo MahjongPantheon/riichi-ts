@@ -1,0 +1,112 @@
+name: CI
+
+on: push
+
+jobs:
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'yarn'
+
+      - name: Install packages
+        run: |
+          yarn install --prefer-offline --frozen-lockfile
+
+      - name: Lint
+        run: yarn lint
+
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Get Deployment Source Branch Name
+        id: git-branch
+        run: |
+          list=$(git ls-remote --quiet | grep ${{ github.ref }})
+          branch=$(echo "$list" | grep "refs/heads" | head -n1 | awk {'print $2'})
+          echo "Deployment branch: ${branch#refs/heads/*}"
+          echo "SOURCE_REF=${branch#refs/heads/*}" >> "$GITHUB_OUTPUT"
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'yarn'
+
+      - name: Install packages
+        run: yarn install --prefer-offline --frozen-lockfile
+
+      - name: Test
+        run: yarn test:ci
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        id: artifact-upload-step
+        with:
+          name: coverage-report
+          path: coverage/clover.xml
+          retention-days: 30
+
+      - name: Download coverage report from main branch
+        if: always() && steps.git-branch.outputs.SOURCE_REF != 'main'
+        id: download-artifact
+        uses: dawidd6/action-download-artifact@v7
+        with:
+          github_token: ${{secrets.GITHUB_TOKEN}}
+          branch: main
+          name: coverage-report
+          path: coverage/master/
+          search_artifacts: true
+          workflow_conclusion: |
+            "failure"
+            "success"
+          if_no_artifact_found: ignore
+
+      - name: Coverage Report
+        if: always() && steps.git-branch.outputs.SOURCE_REF != 'main'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          empty='<?xml version="1.0" encoding="UTF-8"?><coverage><project><metrics statements="0" coveredstatements="0" conditionals="0" coveredconditionals="0" methods="0" coveredmethods="0" elements="0" coveredelements="0"/></project></coverage>'
+          TOTAL_STMTS=$(cat coverage/clover.xml | yq --input-format xml '.coverage.project.metrics.+@statements')
+          COVERED_STMTS=$(cat coverage/clover.xml | yq --input-format xml '.coverage.project.metrics.+@coveredstatements')
+          PERCENTAGE_STMTS=$(echo "100 * ${COVERED_STMTS} / ${TOTAL_STMTS}" | bc)
+          TOTAL_FUNCS=$(cat coverage/clover.xml | yq --input-format xml '.coverage.project.metrics.+@methods')
+          COVERED_FUNCS=$(cat coverage/clover.xml | yq --input-format xml '.coverage.project.metrics.+@coveredmethods')
+          PERCENTAGE_FUNCS=$(echo "100 * ${COVERED_FUNCS} / ${TOTAL_FUNCS}" | bc)
+          TOTAL_BRANCHES=$(cat coverage/clover.xml | yq --input-format xml '.coverage.project.metrics.+@conditionals')
+          COVERED_BRANCHES=$(cat coverage/clover.xml | yq --input-format xml '.coverage.project.metrics.+@coveredconditionals')
+          PERCENTAGE_BRANCHES=$(echo "100 * ${COVERED_BRANCHES} / ${TOTAL_BRANCHES}" | bc)
+          TOTAL_STMTS_M=$((cat coverage/master/clover.xml || echo $empty) | yq --input-format xml '.coverage.project.metrics.+@statements')
+          COVERED_STMTS_M=$((cat coverage/master/clover.xml || echo $empty) | yq --input-format xml '.coverage.project.metrics.+@coveredstatements')
+          PERCENTAGE_STMTS_M=$(echo "100 * ${COVERED_STMTS_M} / ${TOTAL_STMTS_M}" | bc)
+          TOTAL_FUNCS_M=$((cat coverage/master/clover.xml || echo $empty) | yq --input-format xml '.coverage.project.metrics.+@methods')
+          COVERED_FUNCS_M=$((cat coverage/master/clover.xml || echo $empty) | yq --input-format xml '.coverage.project.metrics.+@coveredmethods')
+          PERCENTAGE_FUNCS_M=$(echo "100 * ${COVERED_FUNCS_M} / ${TOTAL_FUNCS_M}" | bc)
+          TOTAL_BRANCHES_M=$((cat coverage/master/clover.xml || echo $empty) | yq --input-format xml '.coverage.project.metrics.+@conditionals')
+          COVERED_BRANCHES_M=$((cat coverage/master/clover.xml || echo $empty) | yq --input-format xml '.coverage.project.metrics.+@coveredconditionals')
+          PERCENTAGE_BRANCHES_M=$(echo "100 * ${COVERED_BRANCHES_M} / ${TOTAL_BRANCHES_M}" | bc)
+          PERCENTAGE_DIFF_STMTS=$(echo "${PERCENTAGE_STMTS} - ${PERCENTAGE_STMTS_M}" | bc)
+          PERCENTAGE_DIFF_FUNCS=$(echo "${PERCENTAGE_FUNCS} - ${PERCENTAGE_FUNCS_M}" | bc)
+          PERCENTAGE_DIFF_BRANCHES=$(echo "${PERCENTAGE_BRANCHES} - ${PERCENTAGE_BRANCHES_M}" | bc)
+          PERCENTAGE_DIFF_STMTS_PREFIX=$(if [ ${PERCENTAGE_DIFF_STMTS} > 0 ]; then echo "🟢+"; else echo "🔴"; fi)
+          PERCENTAGE_DIFF_FUNCS_PREFIX=$(if [ ${PERCENTAGE_DIFF_FUNCS} > 0 ]; then echo "🟢+"; else echo "🔴"; fi)
+          PERCENTAGE_DIFF_BRANCHES_PREFIX=$(if [ ${PERCENTAGE_DIFF_BRANCHES} > 0 ]; then echo "🟢+"; else echo "🔴"; fi)
+          COMMENT_TEXT="## Code coverage report:
+
+          | Branch  | Statements       | Functions       | Branches       |
+          | ------- | ---------------- | --------------- | -------------- |
+          | master  | ${COVERED_STMTS_M} / ${TOTAL_STMTS_M} (${PERCENTAGE_STMTS_M}%) | ${COVERED_FUNCS_M} / ${TOTAL_FUNCS_M} (${PERCENTAGE_FUNCS_M}%) | ${COVERED_BRANCHES_M} / ${TOTAL_BRANCHES_M} (${PERCENTAGE_BRANCHES_M}%) |
+          | current | ${COVERED_STMTS} / ${TOTAL_STMTS} (${PERCENTAGE_STMTS}%) | ${COVERED_FUNCS} / ${TOTAL_FUNCS} (${PERCENTAGE_FUNCS}%) | ${COVERED_BRANCHES} / ${TOTAL_BRANCHES} (${PERCENTAGE_BRANCHES}%) |
+          | DIFF    | ${PERCENTAGE_DIFF_STMTS_PREFIX}${PERCENTAGE_DIFF_STMTS}% | ${PERCENTAGE_DIFF_FUNCS_PREFIX}${PERCENTAGE_DIFF_FUNCS}% | ${PERCENTAGE_DIFF_BRANCHES_PREFIX}${PERCENTAGE_DIFF_BRANCHES}% |
+
+          Full coverage summary uploaded to ${{ steps.artifact-upload-step.outputs.artifact-url }}"
+          gh pr comment ${{ steps.git-branch.outputs.SOURCE_REF }} --body="$COMMENT_TEXT"
+
