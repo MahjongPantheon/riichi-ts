@@ -104,7 +104,7 @@ const decodeMeld: (meldStr: string) => [number[], number] = (meldStr) => {
     let base = Math.floor((meld >> 10) / 3);
     base = Math.floor(base / 7) * 9 + (base % 7);
     const tiles = [t0 + 4 * base /* + 0*/, t1 + 4 * (base + 1), t2 + 4 * (base + 2)];
-    for (let tile of tiles) {
+    for (const tile of tiles) {
       if (tile === FIVE_RED_MAN || tile === FIVE_RED_PIN || tile === FIVE_RED_SOU) {
         akaCount++;
       }
@@ -125,7 +125,7 @@ const decodeMeld: (meldStr: string) => [number[], number] = (meldStr) => {
         ? [t0 + 4 * base, t1 + 4 * base, t2 + 4 * base]
         : [t0 + 4 * base, t1 + 4 * base, t2 + 4 * base, t4 + 4 * base];
 
-    for (let tile of tiles) {
+    for (const tile of tiles) {
       if (tile === FIVE_RED_MAN || tile === FIVE_RED_PIN || tile === FIVE_RED_SOU) {
         akaCount++;
       }
@@ -139,7 +139,7 @@ const decodeMeld: (meldStr: string) => [number[], number] = (meldStr) => {
     const fromPlayer = meld & 0x3;
     const base = Math.floor((meld >> 8) / 4);
     const tiles = [4 * base, 1 + 4 * base, 2 + 4 * base, 3 + 4 * base];
-    for (let tile of tiles) {
+    for (const tile of tiles) {
       if (tile === FIVE_RED_MAN || tile === FIVE_RED_PIN || tile === FIVE_RED_SOU) {
         akaCount++;
       }
@@ -161,11 +161,10 @@ export const prepareTestData = (content: string) => {
   let currentDealer = 0;
   let bakaze = 27;
   let jikaze = 27;
-  let foundHands = 0;
   let withAka = false;
   let withKuitan = false;
   let withKiriage = false;
-  let hands: Array<{
+  const hands: Array<{
     openPart: number[][];
     closedPart: number[];
     isTsumo: boolean;
@@ -218,7 +217,7 @@ export const prepareTestData = (content: string) => {
             break;
           }
           const hai = attribs.hai.split(',').map((t) => parseInt(t, 10));
-          for (let tile of hai) {
+          for (const tile of hai) {
             if (tile === FIVE_RED_MAN || tile === FIVE_RED_PIN || tile === FIVE_RED_SOU) {
               akaCount++;
             }
@@ -229,7 +228,7 @@ export const prepareTestData = (content: string) => {
 
           const melds = (attribs.m ?? '').split(',');
           const openPart = [];
-          for (let meld of melds) {
+          for (const meld of melds) {
             const [meldDec, aka] = decodeMeld(meld);
             if (meldDec.length === 0) {
               continue;
@@ -238,7 +237,7 @@ export const prepareTestData = (content: string) => {
             akaCount += aka;
           }
 
-          let closedPart = hai.map(toTiles);
+          const closedPart = hai.map(toTiles);
           for (let i = 0; i < closedPart.length; i++) {
             if (closedPart[i] === takenTile) {
               closedPart.splice(i, 1);
@@ -301,7 +300,6 @@ export const prepareTestData = (content: string) => {
             });
           }
 
-          foundHands++;
           hands.push({
             openPart: openPart,
             closedPart: closedPart,

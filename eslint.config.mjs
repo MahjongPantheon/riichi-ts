@@ -17,8 +17,8 @@ export default [
         sourceType: 'module',
       },
     },
-    files: ['*.ts'],
-    ignores: ['*.js'],
+    files: ['**/*.ts'],
+    ignores: ['**/*.js', '**/*.d.ts'],
 
     settings: {
       react: {
