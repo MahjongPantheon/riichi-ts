@@ -18,6 +18,7 @@ export default [
       },
     },
     files: ['*.ts'],
+    ignores: ['*.js'],
 
     settings: {
       react: {
