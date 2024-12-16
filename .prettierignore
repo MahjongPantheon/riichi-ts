@@ -1,3 +1,4 @@
 app/clients/*
 .github/**/*
 README.md
+**/*.js

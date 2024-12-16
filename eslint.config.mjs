@@ -1,10 +1,17 @@
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import prettierPlugin from 'eslint-plugin-prettier/recommended';
-import { fixupPluginRules } from '@eslint/compat';
+import { fixupPluginRules, includeIgnoreFile } from '@eslint/compat';
 import typescriptEslint from '@typescript-eslint/eslint-plugin';
 import unusedImports from 'eslint-plugin-unused-imports';
 import tsParser from '@typescript-eslint/parser';
 
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const gitignorePath = path.resolve(__dirname, '.gitignore');
+
 export default [
+  includeIgnoreFile(gitignorePath),
   {
     languageOptions: {
       parser: tsParser,
