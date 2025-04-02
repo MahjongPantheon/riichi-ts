@@ -2847,6 +2847,11 @@ reusify@^1.0.4:
   resolved "https://registry.npmjs.org/reusify/-/reusify-1.0.4.tgz"
   integrity sha512-U9nH88a3fc/ekCF1l0/UP1IosiuIjyTh7hBvXVMHYgVcfGvt897Xguj2UOLDeI5BG2m7/uwyaLVT6fbtCwTyzw==
 
+riichi-rs-node@^0.2.8:
+  version "0.2.8"
+  resolved "https://registry.yarnpkg.com/riichi-rs-node/-/riichi-rs-node-0.2.8.tgz#4fd7997fada8635f8e6feee87eae48caabd012c5"
+  integrity sha512-zUhJcXfvrAG9y8r3h/YADJvzpCch1ZJDUEpn7Rg/azCecgF/T9ci6cIcxremeO94EXcxlTDcRR9VKWpM+iOGFw==
+
 run-parallel@^1.1.9:
   version "1.2.0"
   resolved "https://registry.npmjs.org/run-parallel/-/run-parallel-1.2.0.tgz"
