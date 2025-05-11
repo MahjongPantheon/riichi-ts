@@ -1,3 +1,12 @@
+## Deprecation disclaimer
+
+This library was deprecated in favor of [riichi-rs-bundlers](https://www.npmjs.com/package/riichi-rs-bundlers)
+and [riichi-rs-node](https://www.npmjs.com/package/riichi-rs-node) libraries based on
+[riichi-rust](https://github.com/MahjongPantheon/riichi-rust) package compiled to wasm.
+
+Please note: this library contains some errors (as described [here](https://qiita.com/tomohxx/items/75b5f771285e1334c0a5))
+that were not fixed due to the deprecation. These errors are fixed in libraries mentioned above.
+
 ## Riichi Typescript library
 
 Small library to calculate hands and yaku for japanese (riichi) mahjong.
